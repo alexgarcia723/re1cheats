@@ -109,7 +109,8 @@ atomic<bool> godmode = false;
 void enableGodMode(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
     while(true){
         if (godmode){
-            cout << "godmode" << endl;
+            //cout << "godmode enabled" << endl;
+            int health = 1000;
             WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
 
         }
@@ -148,7 +149,7 @@ int main()
     
     SIZE_T numBytes = 0;
 
-    int data = 0;
+    
     string input;
 
     Memory yPos("Y Value", 0x009E41BC, {0x48, 0x970, 0x14,0x14,0x14,0x10,0x74}, Process, BaseAddress);
@@ -156,8 +157,8 @@ int main()
     Memory playerChar("Character", 0xD7C9C0, {0x5118}, Process, 0);
     Memory playerHealth("Health", 0xDE41BC, {0x14C, 0x13BC}, Process, 0);
 
-    thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &data, sizeof(data), &numBytes );
-    thread godThread(enableGodMode);
+    int godhealth = 10000;
+    thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &godhealth, sizeof(godhealth), &numBytes );
 
     bool running = true;
 
