@@ -5,9 +5,12 @@
 #include <TlHelp32.h>
 #include <vector>
 #include <Psapi.h>
+#include <thread>
+#include <atomic>
 using namespace std;
 #pragma comment(lib, "Ws2_32.lib")
 
+/*
 int ListProcesses(){
 
     HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -23,6 +26,8 @@ int ListProcesses(){
         CloseHandle(Snapshot);
     return 1;
 } 
+*/
+
 
 DWORD GetProcessIdByName(string s){
     HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -85,31 +90,53 @@ class Memory{
     DWORD Pointer;
     
 
-    public: Memory(string Name, DWORD address, vector<DWORD> offsets){
+    public: Memory(string Name, DWORD address, vector<DWORD> offsets, HANDLE ProcessHandle, DWORD BaseAddress){
         this->Address = address;
         this->Name = Name;
         this->Offsets = offsets;
-    }
-
-    public: void SetPointer(HANDLE ProcessHandle, DWORD BaseAddress){
         Pointer = GetPointerAddress(ProcessHandle, BaseAddress, Address, Offsets);
     }
 
     public: void SetPointerRelative(DWORD RelAddr, int offset){
         Pointer = RelAddr + offset;
     }
-    public: void StaticPointer(HANDLE ProcessHandle){
-        Pointer = GetPointerAddress(ProcessHandle, Address, 0x0, Offsets);
-    }
 
 };
+
+atomic<bool> godmode = false;
+
+
+void enableGodMode(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
+    while(true){
+        if (godmode){
+            cout << "godmode" << endl;
+            WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+
+        }
+    }
+
+}
+
+
+
+void printMenu(){
+    cout << "Resident Evil Cheat Menu" << endl;
+    cout << "Select Cheats" << endl;
+    cout << "1. Toggle Godmode" << endl;
+    cout << "2. Change Player Position" << endl;
+    cout << "3. Toggle Infinite Ammo" << endl;
+    cout << "4. Add Item" << endl;
+    cout << "5. Change Character" << endl;
+    cout << "6. Set Health" << endl;
+    cout << "q. Quit" << endl;
+}
 
 int main()
 {
     string s;
-    //ListProcesses();
-    //cin >> s;
     s = "bhd.exe";
+
+    
 
     DWORD pId = GetProcessIdByName(s);
     HANDLE Process  = OpenProcess(PROCESS_ALL_ACCESS, 0, pId);
@@ -124,45 +151,40 @@ int main()
     int data = 0;
     string input;
 
-    Memory yPos("Y Value", 0x009E41BC, {0x48, 0x970, 0x14,0x14,0x14,0x10,0x74});
-    Memory xPos("X Value", 0x0, {0x0});
-    Memory playerChar("Character", 0xD7C9C0, {0x5118});
-    playerChar.StaticPointer(Process);
+    Memory yPos("Y Value", 0x009E41BC, {0x48, 0x970, 0x14,0x14,0x14,0x10,0x74}, Process, BaseAddress);
+    Memory xPos("X Value", 0x0, {0x0}, Process, BaseAddress);
+    Memory playerChar("Character", 0xD7C9C0, {0x5118}, Process, 0);
+    Memory playerHealth("Health", 0xDE41BC, {0x14C, 0x13BC}, Process, 0);
 
-    
-    
+    thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &data, sizeof(data), &numBytes );
+    thread godThread(enableGodMode);
 
-    cout << "Pointer Addr:  " << (LPCVOID)playerChar.Pointer << endl;
-
-    yPos.SetPointer(Process,BaseAddress);
-    xPos.SetPointerRelative(yPos.Pointer, -4);
-
-    while (true) {
-
-        
+    bool running = true;
 
 
-        ReadProcessMemory(Process, (LPCVOID)playerChar.Pointer, &data, sizeof(data), nullptr);
+    //WriteProcessMemory(Process, (LPVOID)CHEAT.Pointer, &data, sizeof(data), &numBytes);
+    while(running){
+        system("cls");
+        printMenu();
+        string selection;
+        cin >> selection;
 
-        cout << "Player Char Value: " << data << endl;
-        cin >> input;
-        data = stof(input);
-        if(data == -1){
-            break;
+        if (selection == "1"){
+            godmode = !godmode;
+        }
+        else if (selection == "6"){
+            cout << "Enter health" << endl;
+            int health;
+            cin >> health;
+            WriteProcessMemory(Process, (LPVOID)playerHealth.Pointer, &health, sizeof(health), &numBytes);
+
+        }
+        else if (selection == "q"){
+             running = false;
         }
 
-        WriteProcessMemory(Process, (LPVOID)playerChar.Pointer, &data, sizeof(data), &numBytes);
-        
-
-
-    /*
-        
-        cout << "Data: " << data << endl;
-        cout << "Please Input New Y Value: ";
-        cin >> data;
-        */
-        
     }
+
 
     
 
