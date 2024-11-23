@@ -134,36 +134,30 @@ void printMenu(){
 
 int main()
 {
-    string s;
-    s = "bhd.exe";
-
     
-
-    DWORD pId = GetProcessIdByName(s);
+    DWORD pId = GetProcessIdByName("bhd.exe");
     HANDLE Process  = OpenProcess(PROCESS_ALL_ACCESS, 0, pId);
-
     MODULEENTRY32 Module = GetModuleFromProcess(pId);
-
-
     DWORD BaseAddress = (DWORD)Module.modBaseAddr;
-    
-    SIZE_T numBytes = 0;
 
     
     string input;
 
     Memory yPos("Y Value", 0x009E41BC, {0x48, 0x970, 0x14,0x14,0x14,0x10,0x74}, Process, BaseAddress);
     Memory xPos("X Value", 0x0, {0x0}, Process, BaseAddress);
+    Memory zPos("Z Value", 0x0, {0x0}, Process, BaseAddress);
+    xPos.SetPointerRelative(yPos.Pointer, -4);
+    zPos.SetPointerRelative(yPos.Pointer, 4);
     Memory playerChar("Character", 0xD7C9C0, {0x5118}, Process, 0);
     Memory playerHealth("Health", 0xDE41BC, {0x14C, 0x13BC}, Process, 0);
 
     int godhealth = 10000;
-    thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &godhealth, sizeof(godhealth), &numBytes );
+    thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &godhealth, sizeof(godhealth), nullptr );
 
     bool running = true;
 
 
-    //WriteProcessMemory(Process, (LPVOID)CHEAT.Pointer, &data, sizeof(data), &numBytes);
+    //WriteProcessMemory(Process, (LPVOID)CHEAT.Pointer, &data, sizeof(data), nullptr);
     while(running){
         system("cls");
         printMenu();
@@ -173,11 +167,26 @@ int main()
         if (selection == "1"){
             godmode = !godmode;
         }
+        else if (selection == "2"){
+            int x,y,z;
+            cout << "enter X position" << endl;
+            cin >> x;
+            cout << "enter Y position" << endl;
+            cin >> y;
+            cout << "enter Z position" << endl;
+            cin >> z;
+            WriteProcessMemory(Process, (LPVOID)xPos.Pointer, &x, sizeof(x), nullptr);
+            WriteProcessMemory(Process, (LPVOID)yPos.Pointer, &y, sizeof(y), nullptr);
+            WriteProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
+        }
+        else if (selection == "3"){
+            
+        }
         else if (selection == "6"){
             cout << "Enter health" << endl;
             int health;
             cin >> health;
-            WriteProcessMemory(Process, (LPVOID)playerHealth.Pointer, &health, sizeof(health), &numBytes);
+            WriteProcessMemory(Process, (LPVOID)playerHealth.Pointer, &health, sizeof(health), nullptr);
 
         }
         else if (selection == "q"){
