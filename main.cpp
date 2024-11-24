@@ -107,6 +107,7 @@ class Memory{
 };
 
 atomic<bool> godmode = false;
+atomic<bool> infammo = false;
 
 
 void enableGodMode(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
@@ -121,8 +122,36 @@ void enableGodMode(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_
 
 }
 
+void enableInfAmmo(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
+    while(true){
+        if (infammo){
+            //cout << "godmode enabled" << endl;
+            int health = 1000;
+            WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+
+        }
+    }
+}
+
 
 void inputInteger(const string& message, int& destination){       
+    string error_message = "";
+    while (true){
+        system("cls");
+        cout << error_message << message << endl;
+        cin >> destination;
+        if(cin.fail()){
+            error_message = "Invalid input must be an integer\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        } else{
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return;
+        }
+    }
+}
+
+void inputFloat(const string& message, float& destination){       
     string error_message = "";
     while (true){
         system("cls");
@@ -192,7 +221,9 @@ int main()
     Memory ammo("Ammo", 0x0097C938, {0x168, 0x4, 0xFFC}, Process, BaseAddress);
 
     int godhealth = 10000;
+    int infAmmo = 10000;
     thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &godhealth, sizeof(godhealth), nullptr );
+    thread ammoThread(enableInfAmmo, Process, (LPVOID)ammo.Pointer, &infAmmo, sizeof(infAmmo), nullptr );
 
     bool running = true;
 
@@ -208,24 +239,24 @@ int main()
             godmode = !godmode;
         }
         else if (selection == "2"){
-            int x,y,z;
-            inputInteger("enter X position", x);
-            inputInteger("enter Y position", y);
-            inputInteger("enter Z position", z);
+            float x,y,z;
+            inputFloat("enter X position", x);
+            inputFloat("enter Y position", y);
+            inputFloat("enter Z position", z);
             WriteProcessMemory(Process, (LPVOID)xPos.Pointer, &x, sizeof(x), nullptr);
             WriteProcessMemory(Process, (LPVOID)yPos.Pointer, &y, sizeof(y), nullptr);
             WriteProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
         }
         else if (selection == "3"){
-            int x,y,z;
-            int dx,dy,dz;
+            float x,y,z;
+            float dx,dy,dz;
             ReadProcessMemory(Process, (LPVOID)xPos.Pointer, &x, sizeof(x), nullptr);
             ReadProcessMemory(Process, (LPVOID)yPos.Pointer, &y, sizeof(y), nullptr);
             ReadProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
 
-            inputInteger("translate X by", dx);
-            inputInteger("translate Y by", dy);
-            inputInteger("translate Z by", dz);
+            inputFloat("translate X by", dx);
+            inputFloat("translate Y by", dy);
+            inputFloat("translate Z by", dz);
 
             x += dx;
             y += dy;
@@ -236,6 +267,9 @@ int main()
             WriteProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
 
 
+        }
+        else if (selection == "4"){
+            infammo = !infammo;
         }
         else if (selection == "5"){
             //0x38 is slot 0
@@ -283,10 +317,6 @@ int main()
 
     }
 
-
-    
-
-    
 
     return 0;
 }
