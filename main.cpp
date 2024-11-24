@@ -237,8 +237,32 @@ int main()
 
 
         }
-        
+        else if (selection == "5"){
+            //0x38 is slot 0
+            int invSlot, itemID, amount;
+
+            cout << "What Inventory Slot Do You Want to Alter? (0-7)" << endl;
+            cin >> invSlot; 
+
+            cout << "Enter the ID of the item you want" << endl;
+            cin >> itemID;
+
+            cout << "How many do you want?" << endl;
+            cin >> amount;
+
+            WriteProcessMemory(Process, (LPVOID)(playerInventory.Pointer + 0x38 + (invSlot * 8)), &itemID, sizeof(itemID), nullptr);
+            WriteProcessMemory(Process, (LPVOID)(playerInventory.Pointer + 0x3C + (invSlot * 8)), &amount, sizeof(amount), nullptr);
+
+        }
+
         else if (selection == "6"){
+            cout << "Enter Character ID # (0-2)" << endl;
+            int charId;
+            cin >> charId;
+            WriteProcessMemory(Process, (LPVOID)playerChar.Pointer, &charId, sizeof(charId), nullptr);
+        }
+        
+        else if (selection == "7"){
             int health;
             inputInteger("input health", health);
             WriteProcessMemory(Process, (LPVOID)playerHealth.Pointer, &health, sizeof(health), nullptr);
