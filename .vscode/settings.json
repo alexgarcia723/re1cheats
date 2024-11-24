@@ -35,6 +35,8 @@
         "vector": "cpp",
         "xutility": "cpp",
         "iostream": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "istream": "cpp",
+        "limits": "cpp"
     }
 }

@@ -1,12 +1,15 @@
 #include <iostream>
+#include <limits>
 #include <string>
 #include <cstdio>
 #include <Windows.h>
+#undef max
 #include <TlHelp32.h>
 #include <vector>
 #include <Psapi.h>
 #include <thread>
 #include <atomic>
+
 using namespace std;
 #pragma comment(lib, "Ws2_32.lib")
 
@@ -119,16 +122,56 @@ void enableGodMode(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_
 }
 
 
+void inputInteger(const string& message, int& destination){       
+    string error_message = "";
+    while (true){
+        system("cls");
+        cout << error_message << message << endl;
+        cin >> destination;
+        if(cin.fail()){
+            error_message = "Invalid input must be an integer\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        } else{
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return;
+        }
+    }
+}
+
+void inputString(const string& message, string& destination){       
+    string error_message = "";
+    while (true){
+        system("cls");
+        cout << error_message << message << endl;
+        cin >> destination;
+        if(cin.fail()){
+            error_message = "Invalid input must be a string\n";
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        } else{
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            return;
+        }
+    }
+}
+
+
+
+
+
+
 
 void printMenu(){
     cout << "Resident Evil Cheat Menu" << endl;
     cout << "Select Cheats" << endl;
     cout << "1. Toggle Godmode" << endl;
     cout << "2. Change Player Position" << endl;
-    cout << "3. Toggle Infinite Ammo" << endl;
-    cout << "4. Add Item" << endl;
-    cout << "5. Change Character" << endl;
-    cout << "6. Set Health" << endl;
+    cout << "3. Translate Player Position" << endl;
+    cout << "4. Toggle Infinite Ammo" << endl;
+    cout << "5. Add Item" << endl;
+    cout << "6. Change Character" << endl;
+    cout << "7. Set Health" << endl;
     cout << "q. Quit" << endl;
 }
 
@@ -169,12 +212,9 @@ int main()
         }
         else if (selection == "2"){
             int x,y,z;
-            cout << "enter X position" << endl;
-            cin >> x;
-            cout << "enter Y position" << endl;
-            cin >> y;
-            cout << "enter Z position" << endl;
-            cin >> z;
+            inputInteger("enter X position", x);
+            inputInteger("enter Y position", y);
+            inputInteger("enter Z position", z);
             WriteProcessMemory(Process, (LPVOID)xPos.Pointer, &x, sizeof(x), nullptr);
             WriteProcessMemory(Process, (LPVOID)yPos.Pointer, &y, sizeof(y), nullptr);
             WriteProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
@@ -183,9 +223,8 @@ int main()
             
         }
         else if (selection == "6"){
-            cout << "Enter health" << endl;
             int health;
-            cin >> health;
+            inputInteger("input health", health);
             WriteProcessMemory(Process, (LPVOID)playerHealth.Pointer, &health, sizeof(health), nullptr);
 
         }
