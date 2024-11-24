@@ -241,14 +241,19 @@ int main()
             //0x38 is slot 0
             int invSlot, itemID, amount;
 
-            cout << "What Inventory Slot Do You Want to Alter? (0-7)" << endl;
-            cin >> invSlot; 
+            do{
+                inputInteger("What Inventory Slot Do You Want to Alter? (0-7)", invSlot);
+            }
+            while (invSlot < 0 || invSlot > 7);
+            
 
-            cout << "Enter the ID of the item you want" << endl;
-            cin >> itemID;
+            do{
+                inputInteger("Enter the ID of the item you want", itemID);
+            } while( itemID < 0 || itemID > 132);
 
-            cout << "How many do you want?" << endl;
-            cin >> amount;
+            do{
+                inputInteger("How many do you want", amount);
+            }   while(amount < 0 || amount > 1000);
 
             WriteProcessMemory(Process, (LPVOID)(playerInventory.Pointer + 0x38 + (invSlot * 8)), &itemID, sizeof(itemID), nullptr);
             WriteProcessMemory(Process, (LPVOID)(playerInventory.Pointer + 0x3C + (invSlot * 8)), &amount, sizeof(amount), nullptr);
@@ -256,9 +261,13 @@ int main()
         }
 
         else if (selection == "6"){
-            cout << "Enter Character ID # (0-2)" << endl;
+            
             int charId;
-            cin >> charId;
+
+            do{
+                inputInteger("Enter Character ID # (0-2)", charId);
+            } while (charId < 0 || charId > 2);
+
             WriteProcessMemory(Process, (LPVOID)playerChar.Pointer, &charId, sizeof(charId), nullptr);
         }
         
