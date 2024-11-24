@@ -194,7 +194,7 @@ void printMenu(){
     cout << "3. Translate Player Position" << endl;
     cout << "4. Toggle Infinite Ammo" << endl;
     cout << "5. Add Item" << endl;
-    cout << "6. Change Character" << endl;
+    cout << "6. Change Character (warning! breaks game sometimes)" << endl;
     cout << "7. Set Health" << endl;
     cout << "q. Quit" << endl;
 }
