@@ -93,9 +93,6 @@ MODULEENTRY32 GetModuleFromProcess(DWORD pId){
 }
 
 
-
-
-
 void inputInteger(const string& message, int& destination){       
     string error_message = "";
     while (true){
@@ -147,16 +144,18 @@ void inputString(const string& message, string& destination){
     }
 }
 
+atomic<bool> godmode = false;
+atomic<bool> infammo = false;
 
 void printMenu(){
     cout << "Resident Evil Cheat Menu" << endl;
     cout << "Select Cheats" << endl;
-    cout << "1. Toggle Godmode" << endl;
+    cout << "1. Toggle Godmode (currently " << godmode << ")" << endl;
     cout << "2. Change Player Position" << endl;
     cout << "3. Translate Player Position" << endl;
-    cout << "4. Toggle Infinite Ammo" << endl;
+    cout << "4. Toggle Infinite Ammo (currently " << infammo << ")" << endl;
     cout << "5. Add Item" << endl;
-    cout << "6. Change Character (warning! breaks game sometimes)" << endl;
+    cout << "6. Change Character (warning! breaks game)" << endl;
     cout << "7. Set Health" << endl;
     cout << "q. Quit" << endl;
 }
@@ -176,30 +175,29 @@ Memory playerInventory("Inventory", 0xD7C9C0, {0}, Process, 0);
 Memory ammo("Ammo", 0x0097C938, {0x168, 0x4, 0xFFC}, Process, BaseAddress);
 
 
-atomic<bool> godmode = false;
-atomic<bool> infammo = false;
 
 
-void enableGodMode(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
+
+void enableGodMode(LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
     while(true){
         if (godmode){
             //cout << "godmode enabled" << endl;
             int health = 1000;
             playerHealth.SetPointer(Process, BaseAddress);
-            WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+            WriteProcessMemory(Process, (LPVOID)playerHealth.Pointer, lpBuffer, nSize, lpNumberOfBytesWritten);
 
         } 
     }
 
 }
 
-void enableInfAmmo(HANDLE hProcess, LPVOID lpBaseAddress, LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
+void enableInfAmmo(LPCVOID lpBuffer,SIZE_T nSize, SIZE_T* lpNumberOfBytesWritten){
     while(true){
         if (infammo){
             //cout << "godmode enabled" << endl;
             int health = 1000;
             ammo.SetPointer(Process, BaseAddress);
-            WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, lpNumberOfBytesWritten);
+            WriteProcessMemory(Process, (LPVOID)ammo.Pointer, lpBuffer, nSize, lpNumberOfBytesWritten);
 
         }
     }
@@ -217,8 +215,8 @@ int main()
 
     int godhealth = 10000;
     int infAmmo = 10000;
-    thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &godhealth, sizeof(godhealth), nullptr );
-    thread ammoThread(enableInfAmmo, Process, (LPVOID)ammo.Pointer, &infAmmo, sizeof(infAmmo), nullptr );
+    thread godThread(enableGodMode, &godhealth, sizeof(godhealth), nullptr );
+    thread ammoThread(enableInfAmmo, &infAmmo, sizeof(infAmmo), nullptr );
 
     bool running = true;
 
