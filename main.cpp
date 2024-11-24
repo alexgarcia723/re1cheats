@@ -13,24 +13,6 @@
 using namespace std;
 #pragma comment(lib, "Ws2_32.lib")
 
-/*
-int ListProcesses(){
-
-    HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-
-    PROCESSENTRY32 Entry;
-    Entry.dwSize = sizeof(PROCESSENTRY32);
-
-        if(Process32First(Snapshot, &Entry) == TRUE){
-            while(Process32Next(Snapshot, &Entry) == TRUE){
-                cout << Entry.szExeFile << endl;
-            }
-        }
-        CloseHandle(Snapshot);
-    return 1;
-} 
-*/
-
 
 DWORD GetProcessIdByName(string s){
     HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -67,7 +49,7 @@ DWORD GetPointerAddress(HANDLE phandle, DWORD gameBaseAddr, DWORD address, vecto
 
 MODULEENTRY32 GetModuleFromProcess(DWORD pId){
 
-    cout << "Pid is still: " << pId << endl;
+    //cout << "Pid is still: " << pId << endl;
     HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pId);
 
     if(Snapshot == INVALID_HANDLE_VALUE) cout << "Bad handle!" << endl;
@@ -97,6 +79,10 @@ class Memory{
         this->Address = address;
         this->Name = Name;
         this->Offsets = offsets;
+        Pointer = GetPointerAddress(ProcessHandle, BaseAddress, Address, Offsets);
+    }
+
+    public: void SetPointer(HANDLE ProcessHandle, DWORD BaseAddress){
         Pointer = GetPointerAddress(ProcessHandle, BaseAddress, Address, Offsets);
     }
 
@@ -189,10 +175,10 @@ void inputString(const string& message, string& destination){
 void printMenu(){
     cout << "Resident Evil Cheat Menu" << endl;
     cout << "Select Cheats" << endl;
-    cout << "1. Toggle Godmode" << endl;
+    cout << "1. Toggle Godmode currently " << godmode << endl;
     cout << "2. Change Player Position" << endl;
     cout << "3. Translate Player Position" << endl;
-    cout << "4. Toggle Infinite Ammo" << endl;
+    cout << "4. Toggle Infinite Ammo currently " << infammo << endl;
     cout << "5. Add Item" << endl;
     cout << "6. Change Character (warning! breaks game sometimes)" << endl;
     cout << "7. Set Health" << endl;
@@ -237,6 +223,10 @@ int main()
 
         if (selection == "1"){
             godmode = !godmode;
+            if(!godmode){
+                int health = 960;
+                WriteProcessMemory(Process, (LPVOID)playerHealth.Pointer, &health, sizeof(health), nullptr);
+            }
         }
         else if (selection == "2"){
             float x,y,z;
