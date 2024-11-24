@@ -13,6 +13,19 @@
 using namespace std;
 #pragma comment(lib, "Ws2_32.lib")
 
+DWORD GetPointerAddress(HANDLE phandle, DWORD gameBaseAddr, DWORD address, vector<DWORD> offsets)
+{
+ 
+    DWORD offset_null = NULL;
+    ReadProcessMemory(phandle, (LPVOID*)(gameBaseAddr + address), &offset_null, sizeof(offset_null), 0);
+    DWORD pointeraddress = offset_null; // the address we need
+    for (int i = 0; i < offsets.size() - 1; i++) // we dont want to change the last offset value so we do -1
+    {
+        ReadProcessMemory(phandle, (LPVOID*)(pointeraddress + offsets.at(i)), &pointeraddress, sizeof(pointeraddress), 0);
+    }
+    return pointeraddress += offsets.at(offsets.size() - 1); // adding the last offset
+}
+
 class Memory{
     public: 
     string Name;
@@ -38,6 +51,7 @@ class Memory{
 
 };
 
+
 DWORD GetProcessIdByName(string s){
     HANDLE Snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     const char *name = s.c_str();
@@ -57,18 +71,6 @@ DWORD GetProcessIdByName(string s){
         return NULL;
 }
 
-DWORD GetPointerAddress(HANDLE phandle, DWORD gameBaseAddr, DWORD address, vector<DWORD> offsets)
-{
- 
-    DWORD offset_null = NULL;
-    ReadProcessMemory(phandle, (LPVOID*)(gameBaseAddr + address), &offset_null, sizeof(offset_null), 0);
-    DWORD pointeraddress = offset_null; // the address we need
-    for (int i = 0; i < offsets.size() - 1; i++) // we dont want to change the last offset value so we do -1
-    {
-        ReadProcessMemory(phandle, (LPVOID*)(pointeraddress + offsets.at(i)), &pointeraddress, sizeof(pointeraddress), 0);
-    }
-    return pointeraddress += offsets.at(offsets.size() - 1); // adding the last offset
-}
 
 MODULEENTRY32 GetModuleFromProcess(DWORD pId){
 
