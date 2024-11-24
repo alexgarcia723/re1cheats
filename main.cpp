@@ -157,11 +157,6 @@ void inputString(const string& message, string& destination){
 }
 
 
-
-
-
-
-
 void printMenu(){
     cout << "Resident Evil Cheat Menu" << endl;
     cout << "Select Cheats" << endl;
@@ -193,6 +188,8 @@ int main()
     zPos.SetPointerRelative(yPos.Pointer, 4);
     Memory playerChar("Character", 0xD7C9C0, {0x5118}, Process, 0);
     Memory playerHealth("Health", 0xDE41BC, {0x14C, 0x13BC}, Process, 0);
+    Memory playerInventory("Inventory", 0xD7C9C0, {0}, Process, 0);
+    Memory ammo("Ammo", 0x0097C938, {0x168, 0x4, 0xFFC}, Process, BaseAddress);
 
     int godhealth = 10000;
     thread godThread(enableGodMode, Process, (LPVOID)playerHealth.Pointer, &godhealth, sizeof(godhealth), nullptr );
@@ -220,8 +217,27 @@ int main()
             WriteProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
         }
         else if (selection == "3"){
-            
+            int x,y,z;
+            int dx,dy,dz;
+            ReadProcessMemory(Process, (LPVOID)xPos.Pointer, &x, sizeof(x), nullptr);
+            ReadProcessMemory(Process, (LPVOID)yPos.Pointer, &y, sizeof(y), nullptr);
+            ReadProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
+
+            inputInteger("translate X by", dx);
+            inputInteger("translate Y by", dy);
+            inputInteger("translate Z by", dz);
+
+            x += dx;
+            y += dy;
+            z += dz;
+
+            WriteProcessMemory(Process, (LPVOID)xPos.Pointer, &x, sizeof(x), nullptr);
+            WriteProcessMemory(Process, (LPVOID)yPos.Pointer, &y, sizeof(y), nullptr);
+            WriteProcessMemory(Process, (LPVOID)zPos.Pointer, &z, sizeof(z), nullptr);
+
+
         }
+        
         else if (selection == "6"){
             int health;
             inputInteger("input health", health);
