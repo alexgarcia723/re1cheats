@@ -5,7 +5,7 @@ Joshua Quick and Alex Garcia
 # Download
 [releases](https://github.com/alexgarcia723/re1cheats/releases)
 # About
-This program runs in the terminal and acts like a cheat menu for the steam release of the 2001 remake of resident evil 1.
+This program runs in the terminal and acts like a cheat menu for the steam release of the 2002 remake of resident evil 1.
 
 [steam link](https://store.steampowered.com/app/304240/Resident_Evil/)
 
