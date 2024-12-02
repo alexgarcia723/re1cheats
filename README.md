@@ -6,7 +6,7 @@ This program runs in the terminal and acts like a cheat menu for the steam relea
 [steam link](https://store.steampowered.com/app/304240/Resident_Evil/)
 
 # Usage
-run with `./re1cheats` AFTER game has opened after a menu will appear
+run with `./re1cheats` AFTER game has opened. A menu will appear
 # Build Yourself
 Must be built in a developer command prompt so you can use `cl`. Have make installed and build with `make` or just do `cl main.cpp -o re1cheats.exe` 
 
